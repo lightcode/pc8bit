@@ -7,19 +7,20 @@ import "github.com/fatih/color"
 const INSTRUCTION_LENGTH = 8
 
 const (
-	NOP    = iota
-	PC_INC = 1 << iota
-	PC_OUT
-	MEM_ADDR_IN
-	MEM_OUT
-	INS_REG_IN
-	INS_REG_OUT
-	REGA_IN
-	REGB_IN
-	ALU_OUT
-	OP_OUT
-	REGA_OUT
-	CLOCK_HALT
+	_      = iota
+	C_CI   = 1 << iota // program Counter Increment
+	C_CO               // program Counter Out
+	C_RO               // RAM Out
+	C_II               // Instruction register In
+	C_IO               // Instruction register Out
+	C_EO               // ALU Out
+	C_AI               // Register A In
+	C_AO               // Register A Out
+	C_BI               // Register B In
+	C_BO               // Register B Out
+	C_HALT             // Halt: disable the clock
+	C_MI               // Memory Register In
+	C_OI               // Out In: bus -> out
 )
 
 type CPU struct {
@@ -60,9 +61,9 @@ func (cpu *CPU) tick() {
 
 	// Loading instruction into the instruction register
 	if cpu.cycle == 0 {
-		cpu.runMicrocode(PC_OUT | MEM_ADDR_IN)
+		cpu.runMicrocode(C_CO | C_MI)
 	} else if cpu.cycle == 1 {
-		cpu.runMicrocode(PC_INC | MEM_OUT | INS_REG_IN)
+		cpu.runMicrocode(C_CI | C_RO | C_II)
 	} else {
 		var ins byte = (cpu.instructionReg >> 4) & 0xF
 		fmt.Printf("ins = %04b\n", ins)
@@ -79,65 +80,61 @@ func (cpu *CPU) tick() {
 }
 
 func (cpu *CPU) runMicrocode(op int64) {
-	if (op & NOP) > 0 {
-		fmt.Println("NOP")
-		cpu.nop()
-	}
-	if (op & PC_INC) > 0 {
-		color.Red("PC_INC")
+	if (op & C_CI) > 0 {
+		color.Red("C_CI")
 		cpu.pcInc()
 	}
-	if (op & PC_OUT) > 0 {
-		color.Red("PC_OUT")
+	if (op & C_CO) > 0 {
+		color.Red("C_CO")
 		cpu.pcOut()
 	}
-	if (op & MEM_OUT) > 0 {
-		color.Red("MEM_OUT")
+	if (op & C_RO) > 0 {
+		color.Red("C_RO")
 		cpu.memOut()
 	}
-	if (op & INS_REG_OUT) > 0 {
-		color.Red("INS_REG_OUT")
+	if (op & C_IO) > 0 {
+		color.Red("C_IO")
 		cpu.insRegOut()
 	}
-	if (op & MEM_ADDR_IN) > 0 {
-		color.Red("MEM_ADDR_IN")
+	if (op & C_MI) > 0 {
+		color.Red("C_MI")
 		cpu.memAddrIn()
 	}
-	if (op & INS_REG_IN) > 0 {
-		color.Red("INS_REG_IN")
+	if (op & C_II) > 0 {
+		color.Red("C_II")
 		cpu.insRegIn()
 	}
-	if (op & ALU_OUT) > 0 {
-		color.Red("ALU_OUT")
+	if (op & C_EO) > 0 {
+		color.Red("C_EO")
 		cpu.aluOut()
 	}
-	if (op & OP_OUT) > 0 {
-		color.Red("OUT")
+	if (op & C_OI) > 0 {
+		color.Red("OI")
 		cpu.out()
 	}
-	if (op & REGA_IN) > 0 {
-		color.Red("REGA_IN")
+	if (op & C_AI) > 0 {
+		color.Red("AI")
 		cpu.regaIn()
 	}
-	if (op & REGA_OUT) > 0 {
-		color.Red("REGA_OUT")
+	if (op & C_AO) > 0 {
+		color.Red("AO")
 		cpu.regaOut()
 	}
-	if (op & REGB_IN) > 0 {
-		color.Red("REGB_IN")
+	if (op & C_BI) > 0 {
+		color.Red("BI")
 		cpu.regbIn()
 	}
-	if (op & CLOCK_HALT) > 0 {
-		color.Red("CLOCK_HALT")
-		cpu.clockHalt()
+	if (op & C_BO) > 0 {
+		color.Red("BO")
+		cpu.regbOut()
+	}
+	if (op & C_HALT) > 0 {
+		color.Red("C_HALT")
+		cpu.disableClock()
 	}
 }
 
-func (cpu *CPU) nop() {
-
-}
-
-func (cpu *CPU) clockHalt() {
+func (cpu *CPU) disableClock() {
 	cpu.clockEnabled = false
 }
 
@@ -180,6 +177,10 @@ func (cpu *CPU) regaIn() {
 }
 
 func (cpu *CPU) regbIn() {
+	cpu.regB = cpu.bus
+}
+
+func (cpu *CPU) regbOut() {
 	cpu.regB = cpu.bus
 }
 

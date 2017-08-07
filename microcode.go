@@ -9,9 +9,9 @@ const (
 )
 
 var microcode = []int64{
-	PC_OUT | MEM_ADDR_IN, PC_INC | MEM_OUT | INS_REG_IN, 0, 0, 0, 0, 0, 0, // NOP
-	PC_OUT | MEM_ADDR_IN, PC_INC | MEM_OUT | INS_REG_IN, INS_REG_OUT | MEM_ADDR_IN, MEM_OUT | REGA_IN, 0, 0, 0, 0, // LDA
-	PC_OUT | MEM_ADDR_IN, PC_INC | MEM_OUT | INS_REG_IN, INS_REG_OUT | MEM_ADDR_IN, MEM_OUT | REGB_IN, ALU_OUT | REGA_IN, 0, 0, 0, // ADD
-	PC_OUT | MEM_ADDR_IN, PC_INC | MEM_OUT | INS_REG_IN, REGA_OUT, OP_OUT, 0, 0, 0, 0, // OUT
-	PC_OUT | MEM_ADDR_IN, PC_INC | MEM_OUT | INS_REG_IN, CLOCK_HALT, 0, 0, 0, 0, 0, // HLT
+	C_CO | C_MI, C_CI | C_RO | C_II, 0, 0, 0, 0, 0, 0, // NOP
+	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_AI, 0, 0, 0, 0, // LDA
+	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_BI, C_EO | C_AI, 0, 0, 0, // ADD
+	C_CO | C_MI, C_CI | C_RO | C_II, C_AO, C_OI, 0, 0, 0, 0, // OUT
+	C_CO | C_MI, C_CI | C_RO | C_II, C_HALT, 0, 0, 0, 0, 0, // HLT
 }
