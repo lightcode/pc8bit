@@ -41,7 +41,12 @@ func (cpu *CPU) tick() {
 	// Loading instruction into the instruction register
 	var ins byte = (cpu.instructionReg >> 4) & 0xF
 	var moff byte = ins*INSTRUCTION_LENGTH + cpu.cycle
-	cpu.runMicrocode(microcode[moff])
+	op := microcode[moff]
+	for _, m := range mins {
+		if (op & m) > 0 {
+			cpu.runMicroInstruction(m)
+		}
+	}
 
 	// Increment op counter
 	cpu.cycle = (cpu.cycle + 1) % 8
@@ -50,14 +55,6 @@ func (cpu *CPU) tick() {
 		fmt.Println("========================================")
 	} else {
 		fmt.Println("----------------------------------------")
-	}
-}
-
-func (cpu *CPU) runMicrocode(op Opcode) {
-	for _, m := range mins {
-		if (op & m) > 0 {
-			cpu.runMicroInstruction(m)
-		}
 	}
 }
 
