@@ -2,12 +2,13 @@ package main
 
 import "fmt"
 import "time"
-import "strconv"
 import "github.com/fatih/color"
 
+const INSTRUCTION_LENGTH = 8
+
 const (
-	NO_OPCODE = iota
-	PC_INC    = 1 << iota
+	NOP    = iota
+	PC_INC = 1 << iota
 	PC_OUT
 	MEM_ADDR_IN
 	MEM_OUT
@@ -20,38 +21,6 @@ const (
 	REGA_OUT
 	CLOCK_HALT
 )
-
-const (
-	NOP = iota & 0xF
-	LDA
-	ADD
-	OUT
-	HLT
-)
-
-var mcode = []int64{
-	0, 0, 0, 0, // NOP
-	INS_REG_OUT | MEM_ADDR_IN, MEM_OUT | REGA_IN, 0, 0, // LDA
-	INS_REG_OUT | MEM_ADDR_IN, MEM_OUT | REGB_IN, ALU_OUT | REGA_IN, 0, // ADD
-	REGA_OUT, OP_OUT, 0, 0, // OUT
-	CLOCK_HALT, 0, 0, 0, // HLT
-}
-
-type Memory struct {
-	data [16]byte
-}
-
-func (m *Memory) Read(addr byte) byte {
-	return m.data[int(addr)]
-}
-
-func (m *Memory) Write(addr, data byte) {
-	m.data[int(addr)] = data
-}
-
-func (m *Memory) Dump() {
-	fmt.Println(m.data)
-}
 
 type CPU struct {
 	clockEnabled   bool    // Is our clock enabled?
@@ -97,22 +66,16 @@ func (cpu *CPU) tick() {
 	} else {
 		var ins byte = (cpu.instructionReg >> 4) & 0xF
 		fmt.Printf("ins = %04b\n", ins)
-		var moff byte = ins*4 + cpu.cycle - 2
-		cpu.runMicrocode(mcode[moff])
+		var moff byte = ins*INSTRUCTION_LENGTH + cpu.cycle
+		cpu.runMicrocode(microcode[moff])
 	}
 
-	//printBin(int64(cpu.cycle&0x0F) << 4)
-
 	// Increment op counter
-	cpu.cycle = (cpu.cycle + 1) % 6
+	cpu.cycle = (cpu.cycle + 1) % 8
 
 	if cpu.cycle == 0 {
 		fmt.Println("========================================")
 	}
-}
-
-func printBin(x int64) {
-	fmt.Println(strconv.FormatInt(x, 2))
 }
 
 func (cpu *CPU) runMicrocode(op int64) {
@@ -222,20 +185,4 @@ func (cpu *CPU) regbIn() {
 
 func (cpu *CPU) regaOut() {
 	cpu.bus = cpu.regA
-}
-
-func main() {
-	mem := new(Memory)
-	mem.Write(0x00, (LDA<<4)|0x0E)
-	mem.Write(0x01, (ADD<<4)|0x0F)
-	mem.Write(0x03, (ADD<<4)|0x0D)
-	mem.Write(0x04, (OUT<<4)|0x00)
-	mem.Write(0x05, (HLT<<4)|0x00)
-	mem.Write(0x0D, 10)
-	mem.Write(0x0E, 15)
-	mem.Write(0x0F, 27)
-	mem.Dump()
-	cpu := &CPU{memory: mem}
-	cpu.Reset()
-	cpu.Run()
 }
