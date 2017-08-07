@@ -6,6 +6,12 @@ import "github.com/fatih/color"
 
 const INSTRUCTION_LENGTH = 8
 
+var mins = []int64{
+	C_HALT,
+	C_CO, C_RO, C_IO, C_AO, C_BO, C_EO, // Always put output before input
+	C_CI, C_MI, C_II, C_OI, C_AI, C_BI,
+}
+
 // Micro instructions
 const (
 	_      = iota
@@ -72,108 +78,53 @@ func (cpu *CPU) tick() {
 }
 
 func (cpu *CPU) runMicrocode(op int64) {
-	if (op & C_CI) > 0 {
+	for _, m := range mins {
+		if (op & m) > 0 {
+			cpu.runMicroInstruction(m)
+		}
+	}
+}
+
+func (cpu *CPU) runMicroInstruction(inst int64) {
+	switch inst {
+	case C_CI:
 		color.Red("C_CI")
-		cpu.pcInc()
-	}
-	if (op & C_CO) > 0 {
+		cpu.pc++
+	case C_CO:
 		color.Red("C_CO")
-		cpu.pcOut()
-	}
-	if (op & C_RO) > 0 {
+		cpu.bus = cpu.pc
+	case C_RO:
 		color.Red("C_RO")
-		cpu.memOut()
-	}
-	if (op & C_IO) > 0 {
+		cpu.bus = cpu.memory.Read(cpu.memAddrReg)
+	case C_IO:
 		color.Red("C_IO")
-		cpu.insRegOut()
-	}
-	if (op & C_MI) > 0 {
+		cpu.bus = cpu.instructionReg & 0x0F
+	case C_MI:
 		color.Red("C_MI")
-		cpu.memAddrIn()
-	}
-	if (op & C_II) > 0 {
+		cpu.memAddrReg = cpu.bus & 0x0F
+	case C_II:
 		color.Red("C_II")
-		cpu.insRegIn()
-	}
-	if (op & C_EO) > 0 {
-		color.Red("C_EO")
-		cpu.aluOut()
-	}
-	if (op & C_OI) > 0 {
+		cpu.instructionReg = cpu.bus
+	case C_HALT:
+		color.Red("HALT")
+		cpu.clockEnabled = false
+	case C_OI:
 		color.Red("OI")
-		cpu.out()
-	}
-	if (op & C_AI) > 0 {
-		color.Red("AI")
-		cpu.regaIn()
-	}
-	if (op & C_AO) > 0 {
+		color.Cyan("OUT : %08b (%d)", cpu.bus, cpu.bus)
+	case C_AO:
 		color.Red("AO")
-		cpu.regaOut()
-	}
-	if (op & C_BI) > 0 {
-		color.Red("BI")
-		cpu.regbIn()
-	}
-	if (op & C_BO) > 0 {
+		cpu.bus = cpu.regA
+	case C_AI:
+		color.Red("AI")
+		cpu.regA = cpu.bus
+	case C_BO:
 		color.Red("BO")
-		cpu.regbOut()
+		cpu.bus = cpu.regB
+	case C_BI:
+		color.Red("BI")
+		cpu.regB = cpu.bus
+	case C_EO:
+		color.Red("EO")
+		cpu.bus = (cpu.regA + cpu.regB) & 0xFF
 	}
-	if (op & C_HALT) > 0 {
-		color.Red("C_HALT")
-		cpu.disableClock()
-	}
-}
-
-func (cpu *CPU) disableClock() {
-	cpu.clockEnabled = false
-}
-
-func (cpu *CPU) out() {
-	color.Cyan("OUT : %08b (%d)", cpu.bus, cpu.bus)
-}
-
-func (cpu *CPU) aluOut() {
-	cpu.bus = (cpu.regA + cpu.regB) & 0xFF
-}
-
-func (cpu *CPU) pcInc() {
-	cpu.pc++
-}
-
-func (cpu *CPU) pcOut() {
-	cpu.bus = cpu.pc
-}
-
-func (cpu *CPU) memAddrIn() {
-	cpu.memAddrReg = cpu.bus & 0x0F
-}
-
-func (cpu *CPU) memOut() {
-	cpu.bus = cpu.memory.Read(cpu.memAddrReg)
-}
-
-func (cpu *CPU) insRegIn() {
-	cpu.instructionReg = cpu.bus
-}
-
-func (cpu *CPU) insRegOut() {
-	cpu.bus = cpu.instructionReg & 0x0F
-}
-
-func (cpu *CPU) regaIn() {
-	cpu.regA = cpu.bus
-}
-
-func (cpu *CPU) regbIn() {
-	cpu.regB = cpu.bus
-}
-
-func (cpu *CPU) regbOut() {
-	cpu.regB = cpu.bus
-}
-
-func (cpu *CPU) regaOut() {
-	cpu.bus = cpu.regA
 }
