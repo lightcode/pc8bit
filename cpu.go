@@ -6,6 +6,7 @@ import "github.com/fatih/color"
 
 const INSTRUCTION_LENGTH = 8
 
+// Micro instructions
 const (
 	_      = iota
 	C_CI   = 1 << iota // program Counter Increment
@@ -45,23 +46,18 @@ func (cpu *CPU) Reset() {
 func (cpu *CPU) Run() {
 	for cpu.clockEnabled {
 		cpu.tick()
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 	}
 }
 
 func (cpu *CPU) tick() {
-	fmt.Println("---------------------------")
-	fmt.Println("PC = ", cpu.pc)
-	fmt.Println("bus = ", cpu.bus)
-	fmt.Println("cycle = ", cpu.cycle)
-	fmt.Println("memAddrReg = ", cpu.memAddrReg)
-	fmt.Printf("ins reg = %08b\n", cpu.instructionReg)
-	fmt.Println("REG_A = ", cpu.regA)
-	fmt.Println("REG_B = ", cpu.regB)
+	fmt.Printf("PC = %d, cycle = %d\n", cpu.pc, cpu.cycle)
+	fmt.Printf("Bus = %08b\n", cpu.bus)
+	fmt.Printf("RegIns = %08b   MemReg = %04b\n", cpu.instructionReg, cpu.memAddrReg)
+	fmt.Printf("RegA   = %08b   RegB   = %08b\n", cpu.regA, cpu.regB)
 
 	// Loading instruction into the instruction register
 	var ins byte = (cpu.instructionReg >> 4) & 0xF
-	fmt.Printf("ins = %04b\n", ins)
 	var moff byte = ins*INSTRUCTION_LENGTH + cpu.cycle
 	cpu.runMicrocode(microcode[moff])
 
@@ -70,6 +66,8 @@ func (cpu *CPU) tick() {
 
 	if cpu.cycle == 0 {
 		fmt.Println("========================================")
+	} else {
+		fmt.Println("----------------------------------------")
 	}
 }
 
@@ -153,8 +151,6 @@ func (cpu *CPU) memAddrIn() {
 }
 
 func (cpu *CPU) memOut() {
-	fmt.Println("DEBUG - mem addr : ", cpu.memAddrReg)
-	cpu.memory.Dump()
 	cpu.bus = cpu.memory.Read(cpu.memAddrReg)
 }
 

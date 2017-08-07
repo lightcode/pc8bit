@@ -10,7 +10,6 @@ func main() {
 	mem.Write(0x0D, 10)
 	mem.Write(0x0E, 15)
 	mem.Write(0x0F, 27)
-	mem.Dump()
 	cpu := &CPU{memory: mem}
 	cpu.Reset()
 	cpu.Run()
