@@ -6,30 +6,6 @@ import "github.com/fatih/color"
 
 const INSTRUCTION_LENGTH = 8
 
-var mins = []int64{
-	C_HALT,
-	C_CO, C_RO, C_IO, C_AO, C_BO, C_EO, // Always put output before input
-	C_CI, C_MI, C_II, C_OI, C_AI, C_BI,
-}
-
-// Micro instructions
-const (
-	_      = iota
-	C_CI   = 1 << iota // program Counter Increment
-	C_CO               // program Counter Out
-	C_RO               // RAM Out
-	C_II               // Instruction register In
-	C_IO               // Instruction register Out
-	C_EO               // ALU Out
-	C_AI               // Register A In
-	C_AO               // Register A Out
-	C_BI               // Register B In
-	C_BO               // Register B Out
-	C_HALT             // Halt: disable the clock
-	C_MI               // Memory Register In
-	C_OI               // Out In: bus -> out
-)
-
 type CPU struct {
 	clockEnabled   bool    // Is our clock enabled?
 	pc             byte    // Program counter
@@ -77,7 +53,7 @@ func (cpu *CPU) tick() {
 	}
 }
 
-func (cpu *CPU) runMicrocode(op int64) {
+func (cpu *CPU) runMicrocode(op Opcode) {
 	for _, m := range mins {
 		if (op & m) > 0 {
 			cpu.runMicroInstruction(m)
@@ -85,7 +61,7 @@ func (cpu *CPU) runMicrocode(op int64) {
 	}
 }
 
-func (cpu *CPU) runMicroInstruction(inst int64) {
+func (cpu *CPU) runMicroInstruction(inst Opcode) {
 	switch inst {
 	case C_CI:
 		color.Red("C_CI")

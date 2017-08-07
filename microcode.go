@@ -8,7 +8,7 @@ const (
 	I_HLT
 )
 
-var microcode = []int64{
+var microcode = []Opcode{
 	C_CO | C_MI, C_CI | C_RO | C_II, 0, 0, 0, 0, 0, 0, // NOP
 	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_AI, 0, 0, 0, 0, // LDA
 	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_BI, C_EO | C_AI, 0, 0, 0, // ADD
