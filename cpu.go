@@ -33,10 +33,7 @@ func (cpu *CPU) Run() {
 }
 
 func (cpu *CPU) tick() {
-	fmt.Printf("PC = %d, cycle = %d\n", cpu.pc, cpu.cycle)
-	fmt.Printf("Bus = %08b\n", cpu.bus)
-	fmt.Printf("RegIns = %08b   MemReg = %04b\n", cpu.instructionReg, cpu.memAddrReg)
-	fmt.Printf("RegA   = %08b   RegB   = %08b\n", cpu.regA, cpu.regB)
+	cpu.printStates()
 
 	// Loading instruction into the instruction register
 	var ins byte = (cpu.instructionReg >> 4) & 0xF
@@ -52,52 +49,63 @@ func (cpu *CPU) tick() {
 	cpu.cycle = (cpu.cycle + 1) % 8
 
 	if cpu.cycle == 0 {
-		fmt.Println("========================================")
+		color.HiBlack("========================================")
 	} else {
-		fmt.Println("----------------------------------------")
+		color.HiBlack("----------------------------------------")
 	}
 }
 
 func (cpu *CPU) runMicroInstruction(inst Opcode) {
 	switch inst {
 	case C_CI:
-		color.Red("C_CI")
+		printOpcode("CI")
 		cpu.pc++
 	case C_CO:
-		color.Red("C_CO")
+		printOpcode("CO")
 		cpu.bus = cpu.pc
 	case C_RO:
-		color.Red("C_RO")
+		printOpcode("RO")
 		cpu.bus = cpu.memory.Read(cpu.memAddrReg)
 	case C_IO:
-		color.Red("C_IO")
+		printOpcode("IO")
 		cpu.bus = cpu.instructionReg & 0x0F
 	case C_MI:
-		color.Red("C_MI")
+		printOpcode("MI")
 		cpu.memAddrReg = cpu.bus & 0x0F
 	case C_II:
-		color.Red("C_II")
+		printOpcode("II")
 		cpu.instructionReg = cpu.bus
 	case C_HALT:
-		color.Red("HALT")
+		printOpcode("HALT")
 		cpu.clockEnabled = false
 	case C_OI:
-		color.Red("OI")
+		printOpcode("OI")
 		color.Cyan("OUT : %08b (%d)", cpu.bus, cpu.bus)
 	case C_AO:
-		color.Red("AO")
+		printOpcode("AO")
 		cpu.bus = cpu.regA
 	case C_AI:
-		color.Red("AI")
+		printOpcode("AI")
 		cpu.regA = cpu.bus
 	case C_BO:
-		color.Red("BO")
+		printOpcode("BO")
 		cpu.bus = cpu.regB
 	case C_BI:
-		color.Red("BI")
+		printOpcode("BI")
 		cpu.regB = cpu.bus
 	case C_EO:
-		color.Red("EO")
+		printOpcode("EO")
 		cpu.bus = (cpu.regA + cpu.regB) & 0xFF
 	}
+}
+
+func printOpcode(text string) {
+	color.Red(text)
+}
+
+func (cpu *CPU) printStates() {
+	fmt.Printf("PC = %d, cycle = %d\n", cpu.pc, cpu.cycle)
+	fmt.Printf("Bus = %08b\n", cpu.bus)
+	fmt.Printf("RegIns = %08b   MemReg = %04b\n", cpu.instructionReg, cpu.memAddrReg)
+	fmt.Printf("RegA   = %08b   RegB   = %08b\n", cpu.regA, cpu.regB)
 }
