@@ -18,6 +18,7 @@ const (
 	ALU_OUT
 	OP_OUT
 	REGA_OUT
+	CLOCK_HALT
 )
 
 const (
@@ -25,6 +26,7 @@ const (
 	LDA
 	ADD
 	OUT
+	HLT
 )
 
 var mcode = []int64{
@@ -32,6 +34,7 @@ var mcode = []int64{
 	INS_REG_OUT | MEM_ADDR_IN, MEM_OUT | REGA_IN, 0, 0, // LDA
 	INS_REG_OUT | MEM_ADDR_IN, MEM_OUT | REGB_IN, ALU_OUT | REGA_IN, 0, // ADD
 	REGA_OUT, OP_OUT, 0, 0, // OUT
+	CLOCK_HALT, 0, 0, 0, // HLT
 }
 
 type Memory struct {
@@ -161,10 +164,18 @@ func (cpu *CPU) runMicrocode(op int64) {
 		color.Red("REGB_IN")
 		cpu.regbIn()
 	}
+	if (op & CLOCK_HALT) > 0 {
+		color.Red("CLOCK_HALT")
+		cpu.clockHalt()
+	}
 }
 
 func (cpu *CPU) nop() {
 
+}
+
+func (cpu *CPU) clockHalt() {
+	cpu.clockEnabled = false
 }
 
 func (cpu *CPU) out() {
@@ -219,6 +230,7 @@ func main() {
 	mem.Write(0x01, (ADD<<4)|0x0F)
 	mem.Write(0x03, (ADD<<4)|0x0D)
 	mem.Write(0x04, (OUT<<4)|0x00)
+	mem.Write(0x05, (HLT<<4)|0x00)
 	mem.Write(0x0D, 10)
 	mem.Write(0x0E, 15)
 	mem.Write(0x0F, 27)
