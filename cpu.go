@@ -60,16 +60,10 @@ func (cpu *CPU) tick() {
 	fmt.Println("REG_B = ", cpu.regB)
 
 	// Loading instruction into the instruction register
-	if cpu.cycle == 0 {
-		cpu.runMicrocode(C_CO | C_MI)
-	} else if cpu.cycle == 1 {
-		cpu.runMicrocode(C_CI | C_RO | C_II)
-	} else {
-		var ins byte = (cpu.instructionReg >> 4) & 0xF
-		fmt.Printf("ins = %04b\n", ins)
-		var moff byte = ins*INSTRUCTION_LENGTH + cpu.cycle
-		cpu.runMicrocode(microcode[moff])
-	}
+	var ins byte = (cpu.instructionReg >> 4) & 0xF
+	fmt.Printf("ins = %04b\n", ins)
+	var moff byte = ins*INSTRUCTION_LENGTH + cpu.cycle
+	cpu.runMicrocode(microcode[moff])
 
 	// Increment op counter
 	cpu.cycle = (cpu.cycle + 1) % 8
