@@ -5,6 +5,7 @@ const (
 	I_LDA
 	I_ADD
 	I_OUT
+	I_JMP
 	I_HLT
 )
 
@@ -13,5 +14,6 @@ var microcode = []Opcode{
 	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_AI, 0, 0, 0, 0, // LDA
 	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_BI, C_EO | C_AI, 0, 0, 0, // ADD
 	C_CO | C_MI, C_CI | C_RO | C_II, C_AO, C_OI, 0, 0, 0, 0, // OUT
+	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_J, 0, 0, 0, 0, 0, // JMP
 	C_CO | C_MI, C_CI | C_RO | C_II, C_HALT, 0, 0, 0, 0, 0, // HLT
 }

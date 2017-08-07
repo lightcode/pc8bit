@@ -63,6 +63,9 @@ func (cpu *CPU) runMicroInstruction(inst Opcode) {
 	case C_CO:
 		printOpcode("CO")
 		cpu.bus = cpu.pc
+	case C_J:
+		printOpcode("J")
+		cpu.pc = cpu.bus & 0x0F
 	case C_RO:
 		printOpcode("RO")
 		cpu.bus = cpu.memory.Read(cpu.memAddrReg)
