@@ -9,11 +9,18 @@ const (
 	I_HLT
 )
 
+const (
+	CY_1 = C_CO | C_MI
+	CY_2 = C_CI | C_RO | C_II
+	CY_3 = C_CO | C_MI
+	CY_4 = C_CI | C_RO | C_ZI
+)
+
 var microcode = []Opcode{
-	C_CO | C_MI, C_CI | C_RO | C_II, 0, 0, 0, 0, 0, 0, // NOP
-	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_AI, 0, 0, 0, 0, // LDA
-	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_MI, C_RO | C_BI, C_EO | C_AI, 0, 0, 0, // ADD
-	C_CO | C_MI, C_CI | C_RO | C_II, C_AO, C_OI, 0, 0, 0, 0, // OUT
-	C_CO | C_MI, C_CI | C_RO | C_II, C_IO | C_J, 0, 0, 0, 0, 0, // JMP
-	C_CO | C_MI, C_CI | C_RO | C_II, C_HALT, 0, 0, 0, 0, 0, // HLT
+	CY_1, CY_2, CY_3, CY_4, 0, 0, 0, 0, // NOP
+	CY_1, CY_2, CY_3, CY_4, C_ZO | C_MI, C_RO | C_AI, 0, 0, // LDA
+	CY_1, CY_2, CY_3, CY_4, C_ZO | C_MI, C_RO | C_BI, C_EO | C_AI, 0, // ADD
+	CY_1, CY_2, CY_3, CY_4, C_AO, C_OI, 0, 0, // OUT
+	CY_1, CY_2, CY_3, CY_4, C_ZO | C_J, 0, 0, 0, // JMP
+	CY_1, CY_2, CY_3, CY_4, C_HALT, 0, 0, 0, // HLT
 }

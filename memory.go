@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type Memory struct {
-	data [16]byte
+	data [256]byte
 }
 
 func (m *Memory) Read(addr byte) byte {

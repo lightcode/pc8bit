@@ -4,8 +4,8 @@ type Opcode int
 
 var mins = []Opcode{
 	C_HALT,
-	C_CO, C_RO, C_IO, C_AO, C_BO, C_EO, // Always put output before input
-	C_CI, C_MI, C_II, C_OI, C_AI, C_BI, C_J,
+	C_CO, C_RO, C_IO, C_AO, C_BO, C_ZO, C_EO, // Always put output before input
+	C_CI, C_MI, C_II, C_OI, C_AI, C_BI, C_ZI, C_J,
 }
 
 // Micro instructions
@@ -22,6 +22,8 @@ const (
 	C_AO                      // Register A Out
 	C_BI                      // Register B In
 	C_BO                      // Register B Out
+	C_ZI                      // Register Z In
+	C_ZO                      // Register Z Out
 	C_HALT                    // Halt: disable the clock
 	C_MI                      // Memory Register In
 	C_OI                      // Out In: bus -> out

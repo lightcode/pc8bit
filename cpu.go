@@ -11,17 +11,19 @@ type CPU struct {
 	pc             byte    // Program counter
 	regA           byte    // A register
 	regB           byte    // B register
-	instructionReg byte    // Instruction register (4 bits)
+	regZ           byte    // Z register
+	instructionReg byte    // Instruction register
 	cycle          byte    // Operation Counter
 	bus            byte    // Bus
 	memAddrReg     byte    // Memory Address Register
-	memory         *Memory // 16 bytes memory
+	memory         *Memory // 256 bytes memory
 }
 
 func (cpu *CPU) Reset() {
 	cpu.pc = 0
 	cpu.regA = 0
 	cpu.regB = 0
+	cpu.regZ = 0
 	cpu.clockEnabled = true
 }
 
@@ -65,7 +67,7 @@ func (cpu *CPU) runMicroInstruction(inst Opcode) {
 		cpu.bus = cpu.pc
 	case C_J:
 		printOpcode("J")
-		cpu.pc = cpu.bus & 0x0F
+		cpu.pc = cpu.bus
 	case C_RO:
 		printOpcode("RO")
 		cpu.bus = cpu.memory.Read(cpu.memAddrReg)
@@ -74,7 +76,7 @@ func (cpu *CPU) runMicroInstruction(inst Opcode) {
 		cpu.bus = cpu.instructionReg & 0x0F
 	case C_MI:
 		printOpcode("MI")
-		cpu.memAddrReg = cpu.bus & 0x0F
+		cpu.memAddrReg = cpu.bus
 	case C_II:
 		printOpcode("II")
 		cpu.instructionReg = cpu.bus
@@ -96,6 +98,12 @@ func (cpu *CPU) runMicroInstruction(inst Opcode) {
 	case C_BI:
 		printOpcode("BI")
 		cpu.regB = cpu.bus
+	case C_ZO:
+		printOpcode("ZO")
+		cpu.bus = cpu.regZ
+	case C_ZI:
+		printOpcode("ZI")
+		cpu.regZ = cpu.bus
 	case C_EO:
 		printOpcode("EO")
 		cpu.bus = (cpu.regA + cpu.regB) & 0xFF
@@ -110,5 +118,5 @@ func (cpu *CPU) printStates() {
 	fmt.Printf("PC = %d, cycle = %d\n", cpu.pc, cpu.cycle)
 	fmt.Printf("Bus = %08b\n", cpu.bus)
 	fmt.Printf("RegIns = %08b   MemReg = %04b\n", cpu.instructionReg, cpu.memAddrReg)
-	fmt.Printf("RegA   = %08b   RegB   = %08b\n", cpu.regA, cpu.regB)
+	fmt.Printf("RegA   = %08b   RegB   = %08b   RegZ   = %08b\n", cpu.regA, cpu.regB, cpu.regZ)
 }
