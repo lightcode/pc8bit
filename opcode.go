@@ -4,7 +4,7 @@ type Opcode int
 
 var mins = []Opcode{
 	C_HALT,
-	C_CO, C_RO, C_IO, C_AO, C_BO, C_ZO, C_EO, // Always put output before input
+	C_CO, C_RO, C_AO, C_BO, C_ZO, C_EO, // Always put output before input
 	C_CI, C_MI, C_II, C_OI, C_AI, C_BI, C_ZI, C_J,
 }
 
@@ -16,7 +16,6 @@ const (
 	C_J                       // program counter in (Jump)
 	C_RO                      // RAM Out
 	C_II                      // Instruction register In
-	C_IO                      // Instruction register Out
 	C_EO                      // ALU Out
 	C_AI                      // Register A In
 	C_AO                      // Register A Out

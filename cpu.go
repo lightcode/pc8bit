@@ -38,7 +38,7 @@ func (cpu *CPU) tick() {
 	cpu.printStates()
 
 	// Loading instruction into the instruction register
-	var ins byte = (cpu.instructionReg >> 4) & 0xF
+	var ins byte = cpu.instructionReg
 	var moff byte = ins*INSTRUCTION_LENGTH + cpu.cycle
 	op := microcode[moff]
 	for _, m := range mins {
@@ -71,9 +71,6 @@ func (cpu *CPU) runMicroInstruction(inst Opcode) {
 	case C_RO:
 		printOpcode("RO")
 		cpu.bus = cpu.memory.Read(cpu.memAddrReg)
-	case C_IO:
-		printOpcode("IO")
-		cpu.bus = cpu.instructionReg & 0x0F
 	case C_MI:
 		printOpcode("MI")
 		cpu.memAddrReg = cpu.bus
